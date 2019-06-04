@@ -1,0 +1,59 @@
+{% extends "favourite/base.html" %}
+{% block title %}Favourites{% endblock %}
+{% block content %}
+{% csrf_token %}
+    {%if favourited == None%}
+    <p>Nothing here save your Favourites Star war movies and planets click below</p>
+    <a href="/" class="btn btn-primary">Home</a>
+ {% endif %}
+    <div class="row">
+
+    {% for favourite in favourited %}
+<div id="id_{{ forloop.counter }}" class="col-sm-3">
+  <div class="card" style="width: 18rem; margin:10px;">
+  <img class="card-img-top" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Star_Wars_Logo.svg/1280px-Star_Wars_Logo.svg.png" alt="Card image cap">
+  <div class="card-body">
+  
+    <h5 class="card-title">{{ favourite.fields.planet }} {{ favourite.fields.film }} </h5>
+    <p class="card-text">{{ favourite.fields.population}} {{ favourite.fields.release }}</p>
+     <button id="id_{{ forloop.counter }}" onclick="submit('{{favourite.fields.planet}}','{{ favourite.fields.movie }}', '{{ forloop.counter }}' )" class="btn btn-primary">Remove</button>
+  </div>
+</div>
+
+  </div>
+    {% endfor %}
+  </div>
+ 
+</div>
+ <script>
+function submit(planet,film, id){
+    var csrf = jQuery("[name=csrfmiddlewaretoken]").val();
+    var element = false
+    var url = '/favourite/movies'
+    if(planet){
+        element =  true
+        url ='/favourite/planets'
+    }
+    fetch(url, {
+  method: "post",
+  credentials: 'same-origin',
+  headers: {
+    "X-CSRFToken": csrf,
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+
+  body: JSON.stringify({
+    planet: planet,
+    movie: film,
+    element: element,
+    guest: "{{guest_id |safe}}"
+  })
+})
+.then( (response) => { 
+   $("#id_"+id).remove()
+});
+}
+</script>
+
+{% endblock %}

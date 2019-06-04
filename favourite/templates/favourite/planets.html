@@ -1,0 +1,97 @@
+{% extends "favourite/base.html" %}
+{% block title %}Planets{% endblock %}
+{% block content %}
+{% csrf_token %}
+    {%if not allPlanets.results %}
+<div class="d-flex justify-content-center align-items-center" style="height:100px;">
+    <h1>Nothing  found</h1>
+    </div>
+ {% endif %}
+    <div class="row">
+    {% for planets in allPlanets.results %}
+<div class="col-sm-3">
+  <div class="card border-success mb-3" style="max-width: 18rem;">
+  <div class="card-header">  {{ planets.name }}</div>
+  <div class="card-body text-success">
+    <h5 class="card-title">Details</h5>
+    <p class="card-text">Population: {{ planets.population}}</p>
+     <p class="card-text">Rotation Period: {{ planets.rotation_period}} </p>
+      <p class="card-text">Orbital Period: {{ planets.orbital_period}} </p>
+      <p class="card-text">diameter: {{ planets.diameter}} </p>
+      <p class="card-text">Climate: {{ planets.climate}} </p>
+      <p class="card-text">Gravity: {{ planets.gravity}} </p>
+      <p class="card-text">Terrain: {{ planets.terrain}} </p>
+      <p class="card-text">Surface water: {{ planets.surface_water}} </p>
+
+</div>
+  <div class="card-footer bg-transparent border-success">
+    {%  if planets.name  not in favourited %}
+    <button id="id_{{ forloop.counter }}" onclick="favourite('{{planets.name}}','{{planets.population}}' ,'{{ forloop.counter }}' )" class="btn btn-outline-primary">Add favourite</button>
+    {%else%}
+    <button class="btn btn-success" disbaled> Your Favourite</button>
+    {%endif%}
+    {%  if planets.name  not in saved %}
+    <button id="idp_{{ forloop.counter }}" onclick="save('{{planets.name}}','{{planets.population}}' ,'{{ forloop.counter }}' )" class="btn btn-outline-primary">Save</button>
+    {%else%}
+    <button class="btn btn-success" disbaled>Saved</button>
+    {%endif%}
+  </div>
+</div>
+</div>
+    {% endfor %}
+     </div>
+
+
+<script>
+function favourite(planet, population, id){
+    var csrf = jQuery("[name=csrfmiddlewaretoken]").val();
+    fetch("/planets/", {
+      method: "post",
+      credentials: 'same-origin',
+      headers: {
+        "X-CSRFToken": csrf,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        planet: planet,
+        population: population,
+        guest: "{{guest_id |safe}}",
+        is_favourite: true
+      })
+    })
+.then( (response) => {
+   if(response.status == 200){
+       $("#id_"+id).prop('disabled', true);
+       $("#id_"+id).text("Your favourite ");
+   }
+});
+}
+
+function save(planet, population, id){
+    var csrf = jQuery("[name=csrfmiddlewaretoken]").val();
+    fetch("/planets/", {
+  method: "post",
+  credentials: 'same-origin',
+  headers: {
+    "X-CSRFToken": csrf,
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+
+  body: JSON.stringify({
+    planet: planet,
+    population: population,
+    guest: "{{guest_id |safe}}",
+    is_save: true
+  })
+})
+.then( (response) => {
+   if(response.status == 200){
+       $("#idp_"+id).prop('disabled', true);
+       $("#idp_"+id).text("Saved ");
+   }
+});
+}
+</script>
+{% endblock %}

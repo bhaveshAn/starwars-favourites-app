@@ -1,0 +1,49 @@
+{% extends "favourite/base.html" %}
+{% block title %}Movies{% endblock %}
+{% block content %}
+{% csrf_token %}
+<div class="row">
+    {% for movies in allmovies.results %}
+<div class="col-sm-3">
+  
+  <div class="card" style="width: 18rem; margin:10px;">
+  <img class="card-img-top" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Star_Wars_Logo.svg/1280px-Star_Wars_Logo.svg.png" alt="Card image cap">
+  <div class="card-body">
+    <h5 class="card-title">{{ movies.title }}</h5>
+    <p class="card-text">{{ movies.release_date}}</p>
+    {%  if movies.title  not in favourited %}
+    <button id="id_{{ movies.episode_id }}" onclick="submit('{{movies.title}}','{{movies.release_date}}','{{ movies.episode_id }}' )" class="btn btn-outline-primary"> Add Favourite</button>
+    {%else%}
+    <button class="btn btn-success" disbaled> Your Favourite</button>
+    {%endif%}
+  </div>
+  </div>
+</div>
+    {% endfor %}
+</div>
+<script>
+function submit(name, release, id){
+    var csrf = jQuery("[name=csrfmiddlewaretoken]").val();
+    fetch("/", {
+  method: "post",
+  credentials: 'same-origin',
+  headers: {
+    "X-CSRFToken": csrf,
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    movie: name,
+    release: release,
+    guest: "{{guest_id |safe}}"
+  })
+})
+.then( (response) => { 
+   if(response.status == 200){
+       $("#id_"+id).prop('disabled', true);
+       $("#id_"+id).text("Your favourite ");
+   }
+});
+}
+</script>
+{% endblock %}
